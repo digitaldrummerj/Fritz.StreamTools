@@ -39,6 +39,8 @@ namespace Fritz.StreamTools.Models
 
 		public string BackgroundColor { get; set; } = "#666";
 
+		public bool Enabled { get; set; } = true;
+
 
   }
 }

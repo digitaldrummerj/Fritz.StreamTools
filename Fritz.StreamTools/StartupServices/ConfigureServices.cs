@@ -40,9 +40,6 @@ namespace Fritz.StreamTools.StartupServices
 
 			services.AddSingleton<IAttentionClient, AttentionHub>();
 
-			// Add the SentimentSink
-			//services.AddSingleton<Fritz.Chatbot.Commands.SentimentSink>();
-
 			services.AddSingleton<IHostedService, SentimentService>();
 			services.AddSingleton<IHostedService, FritzBot>();
 
@@ -53,6 +50,13 @@ namespace Fritz.StreamTools.StartupServices
 
 			RegisterGitHubServices(services, configuration);
 
+			services.AddHttpClient("DiscoverDotNet");
+
+			services.AddHttpClient("ShoutoutCommand", c =>
+			{
+				c.BaseAddress = new Uri("https://api.twitch.tv/kraken/channels/");
+				c.DefaultRequestHeaders.Add("client-id", configuration["StreamServices:Twitch:ClientId"]);
+			});
 
 		}
 
@@ -60,6 +64,10 @@ namespace Fritz.StreamTools.StartupServices
 
 		private static void RegisterGitHubServices(IServiceCollection services, IConfiguration configuration)
 		{
+
+			// Exit now if GitHub is not enabled
+			if (!bool.Parse(configuration["GitHub:Enabled"])) return;
+
 			services.AddSingleton<GitHubRepository>();
 			services.AddSingleton<GithubyMcGithubFaceClient>();
 
@@ -74,15 +82,8 @@ namespace Fritz.StreamTools.StartupServices
 				c.DefaultRequestHeaders.Add("Accept", "applications/json");
 			});
 
-			services.AddHttpClient("DiscoverDotNet");
-
-			services.AddHttpClient("ShoutoutCommand", c =>
-			{
-				c.BaseAddress = new Uri("https://api.twitch.tv/kraken/channels/");
-				c.DefaultRequestHeaders.Add("client-id", configuration["StreamServices:Twitch:ClientId"]);
-			});
-
 			services.AddHostedService<GitHubService>();
+
 		}
 
 		private static void AddStreamingServices(this IServiceCollection services,
